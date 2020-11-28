@@ -1,64 +1,41 @@
 <template id="app">
   <div id="app" class="q-px-md">
-    <div class="row items-end q-col-gutter-md">
 
-      <div class="col-3 q-my-md">
-        <q-card align="middle">
-          <q-card-section :class="classes">
-            <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar($event)">
-              <q-icon color="red" :name="fasTimes" />
-            </div>
-
-            <div class="absolute-center">
-              <p>{{ msg }}</p> 
-            </div>
-          </q-card-section>
-        </q-card>
+    <div class="row">
+      <div class="col-md-5">
+        <q-form>
+          <q-input square outlined class="q-my-md" label="CEP" v-model="mensagem"/>
+        </q-form>
       </div>
 
-      <div class="col-3 q-my-md">
-        <q-card align="middle">
-          <q-card-section :class="classes">
-            <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar($event)">
-              <q-icon color="red" :name="fasTimes" />
-            </div>
-
-            <div class="absolute-center">
-              <p>{{ msg }}</p> 
-            </div>
-          </q-card-section>
-        </q-card>
+      <div class="col-md-5">
+        <q-input square outlined class="q-my-md" label="Titulo" v-model="titulo"/>
       </div>
 
-      <div class="col-3 q-my-md">
-        <q-card align="middle">
-          <q-card-section :class="classes">
-            <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar($event)">
-              <q-icon color="red" :name="fasTimes" />
-            </div>
-
-            <div class="absolute-center">
-              <p>{{ msg }}</p> 
-            </div>
-          </q-card-section>
-        </q-card>
+      <div class="col-md-2">
+        <q-btn unelevated class="full-width q-mt-md" color="info" icon-right="send" label="ENVIAR" size="21.7px" @click="novoCep()"/>
       </div>
-
-      <div class="col-3 q-my-md">
-        <q-card align="middle">
-          <q-card-section :class="classes">
-            <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar($event)">
-              <q-icon color="red" :name="fasTimes" />
-            </div>
-
-            <div class="absolute-center">
-              <p>{{ msg }}</p> 
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
     </div>
+
+    <div class="row items-end" v-for="i in Math.ceil(ceps.length / 4)" :key="ceps[i-1].id">
+      <transition-group name="fade" tag="div" class="col-md-3 q-col-gutter-md">
+        <div class="q-my-md" v-for="cep in ceps.slice((i-1) * 4, i * 4)" :key="cep.id">
+            <q-card align="middle">
+              <q-card-section :class="classes">
+                <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar(cep)">
+                  <q-icon color="red" :name="fasTimes" />
+                </div>
+
+                <div class="absolute-center">
+                  <p>{{ cep.title }}</p>
+                  <p>{{ cep.rua }}</p>
+                </div>
+              </q-card-section>
+            </q-card>
+        </div>
+      </transition-group>
+    </div>
+
   </div>
 </template>
 
@@ -70,15 +47,29 @@
     data() {
       return {
         msg: 'Test',
-        classes: 'teste text-h3 text-weight-bold text-uppercase bg-info vertical-middle'
+        classes: 'teste text-h3 text-weight-bold text-uppercase bg-info vertical-middle',
+        id: 0,
+        mensagem: '',
+        titulo: '',
+        ceps: []
       }
     },
     created() {
-      this.fasTimes = fasTimes
+      this.fasTimes = fasTimes;
     },
     methods: {
-      fechar(event) {
-        event.currentTarget.parentElement.parentElement.classList.add("hidden");
+      fechar(cep) {
+        const cepIndex = this.ceps.indexOf(cep);
+        this.ceps.splice(cepIndex, 1);
+      },
+      novoCep() {
+        const novoEndereco = {id: this.id, title: this.titulo, rua: this.mensagem};
+
+        this.id++;
+        
+        if(this.titulo !== '' && this.mensagem !== ''){
+          this.ceps.push(novoEndereco);
+        }
       }
     }
   }
