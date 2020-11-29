@@ -1,7 +1,7 @@
 <template id="app">
   <div id="app" class="q-px-md">
 
-    <div class="row">
+    <div class="row q-col-gutter-xs">
       <div class="col-md-5">
         <q-form>
           <q-input square outlined class="q-my-md" label="CEP" v-model="mensagem"/>
@@ -17,9 +17,10 @@
       </div>
     </div>
 
-    <div class="row items-end" v-for="i in Math.ceil(ceps.length / 4)" :key="ceps[i-1].id">
-      <transition-group name="fade" tag="div" class="col-md-3 q-col-gutter-md">
-        <div class="q-my-md" v-for="cep in ceps.slice((i-1) * 4, i * 4)" :key="cep.id">
+
+    <transition-group name="fade" tag="div">
+      <transition-group name="fade" tag="div" class="row q-col-gutter-md items-end" v-for="i in Math.ceil(ceps.length / 4)" :key="i">
+        <div class="col-md-3 q-my-sm" v-for="cep in ceps.slice((i-1) * 4, i * 4)" :key="cep">
             <q-card align="middle">
               <q-card-section :class="classes">
                 <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar(cep)">
@@ -34,7 +35,7 @@
             </q-card>
         </div>
       </transition-group>
-    </div>
+    </transition-group>
 
   </div>
 </template>
