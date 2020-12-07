@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Encontra CEP
         </q-toolbar-title>
       </q-toolbar>
     </q-header>

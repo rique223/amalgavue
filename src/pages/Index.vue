@@ -4,32 +4,51 @@
     <div class="row q-col-gutter-xs">
       <div class="col-md-5">
         <q-form>
-          <q-input square outlined class="q-my-md" label="CEP" v-model="mensagem"/>
+          <q-input square mask="##.###-###" outlined class="q-my-md" label="CEP" v-model="mensagem"/>
         </q-form>
       </div>
 
-      <div class="col-md-5">
+      <div class="col-md-4">
         <q-input square outlined class="q-my-md" label="Titulo" v-model="titulo"/>
       </div>
 
       <div class="col-md-2">
         <q-btn unelevated class="full-width q-mt-md" color="info" icon-right="send" label="ENVIAR" size="21.7px" @click="novoCep()"/>
       </div>
+      <div class="col-md-1">
+        <q-btn unelevated class="full-width q-mt-md" color="negative" size="21.7px" @click="deleteGeral()">
+          <q-icon color="white" :name="fasTimesCircle"/>
+          <q-tooltip>
+            Delete todos os cards
+          </q-tooltip>
+        </q-btn>
+      </div>
     </div>
 
 
     <transition-group name="fade" tag="div">
       <transition-group name="fade" tag="div" class="row q-col-gutter-md items-end" v-for="i in Math.ceil(ceps.length / 4)" :key="i">
-        <div class="col-md-3 q-my-sm" v-for="cep in ceps.slice((i-1) * 4, i * 4)" :key="cep">
+        <div class="col-md-3 q-my-sm" v-for="cep in ceps.slice((i-1) * 4, i * 4)" :key="cep.id">
             <q-card align="middle">
               <q-card-section :class="classes">
-                <div class="absolute-top-right q-pt-xs q-pr-sm" @click="fechar(cep)">
-                  <q-icon color="red" :name="fasTimes" />
+                <div style="z-index: 9999" class="absolute-top-right q-pt-xs q-pr-sm cursor-pointer">
+                  <q-icon color="white" :name="fasTimes" @click="fechar(cep)"/>
                 </div>
 
-                <div class="absolute-center">
-                  <p>{{ cep.title }}</p>
-                  <p>{{ cep.rua }}</p>
+                <div class="absolute-center full-width q-pa-lg">
+                  <article class="q-mb-lg">
+                    <h2 style="margin: 0; cursor: default" class="text-h3">{{ cep.titulo }}</h2>
+                  </article>
+
+                  <article class="q-mb-md">
+                    <p style="cursor: default" class="text-h5 text-bold q-ma-none text-left text-light-blue-10">{{ cep.cep }}</p>
+                    <h2 style="cursor: default" class="text-h5 text-left q-ma-none text-weight-light text-light-blue-1">CEP</h2>
+                  </article>
+                  
+                  <article class="q-mb-md">
+                    <p style="cursor: default" class="text-h5 text-bold q-ma-none text-left text-light-blue-10">{{ cep.rua }}  {{ cep.bairro }} {{ cep.cidade }}-{{ cep.estado }}</p>
+                    <h2 style="cursor: default" class="text-h5 text-left q-ma-none text-weight-light text-light-blue-1">Endereço</h2>
+                  </article>
                 </div>
               </q-card-section>
             </q-card>
@@ -42,21 +61,25 @@
 
 <script>
   import { fasTimes } from '@quasar/extras/fontawesome-v5';
+  import { fasTimesCircle } from '@quasar/extras/fontawesome-v5';
+  import { axios } from '../boot/axios';
 
   export default {
     name: 'PageIndex',
     data() {
       return {
-        msg: 'Test',
         classes: 'teste text-h3 text-weight-bold text-uppercase bg-info vertical-middle',
         id: 0,
         mensagem: '',
         titulo: '',
-        ceps: []
+        ceps: [],
+        fasTimes: '',
+        fasTimesCircle: ''
       }
     },
     created() {
       this.fasTimes = fasTimes;
+      this.fasTimesCircle = fasTimesCircle;
     },
     methods: {
       fechar(cep) {
@@ -64,13 +87,38 @@
         this.ceps.splice(cepIndex, 1);
       },
       novoCep() {
-        const novoEndereco = {id: this.id, title: this.titulo, rua: this.mensagem};
+        let novoCep;
+
+        if(this.titulo !== '' && this.mensagem !== ''){
+          this.$axios.get(`https://brasilapi.com.br/api/cep/v1/${this.mensagem}`)
+          .then((response) => {
+            novoCep = {id: this.id, cep: this.formataCep(response.data.cep), estado: response.data.state, cidade: response.data.city, bairro: response.data.neighborhood, rua: response.data.street, titulo: this.titulo};
+
+            this.ceps.push(novoCep);
+          })
+          .catch(() => {
+            this.$q.notify({
+              color: 'negative',
+              position: 'top',
+              message: 'Este cep não existe',
+              icon: 'report_problem'
+            })
+          })
+        }
 
         this.id++;
+      },
+      formataCep(str) {
+        let part1 = str.slice(0, 2);
+        let part2 = str.slice(2, 5);
+        let part3 = str.slice(5, 8);
         
-        if(this.titulo !== '' && this.mensagem !== ''){
-          this.ceps.push(novoEndereco);
-        }
+        str = part1 + '.' + part2 + '-' + part3;
+
+        return str;
+      },
+      deleteGeral() {
+        this.ceps = [];
       }
     }
   }
