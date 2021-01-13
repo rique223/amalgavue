@@ -3,12 +3,12 @@
 
     <div class="row q-col-gutter-xs">
       <div class="col-md-5">
-        <q-input square @submit.prevent outlined class="q-my-md" label="Titulo" v-model="titulo"/>
+        <q-input square @submit.prevent outlined class="q-my-md" label="Titulo" @keyup.enter="novoCep()" v-model="titulo"/>
       </div>
       
       <div class="col-md-4">
         <q-form>
-          <q-input square @submit.prevent mask="##.###-###" outlined class="q-my-md" label="CEP" v-model="mensagem"/>
+          <q-input square @submit.prevent mask="##.###-###" outlined class="q-my-md" @keyup.enter="novoCep()" label="CEP" v-model="mensagem"/>
         </q-form>
       </div>
 
@@ -94,27 +94,43 @@
       fechar(cep) {
         const cepIndex = this.ceps.indexOf(cep);
         this.ceps.splice(cepIndex, 1);
+        
+        if(this.id === 1) {
+          this.id = 1;
+        } else {
+          this.id--;
+        }
       },
       novoCep() {
         let novoCep;
 
         if(this.titulo !== '' && this.mensagem !== ''){
           this.$axios.get(`https://brasilapi.com.br/api/cep/v1/${this.mensagem}`)
-          .then((response) => {
-            novoCep = {id: this.id, cep: this.formataCep(response.data.cep), estado: response.data.state, cidade: response.data.city, bairro: response.data.neighborhood, rua: response.data.street, titulo: this.titulo};
+          .then(
+            (response) => {
+              novoCep = {
+                id: this.id, 
+                cep: this.formataCep(response.data.cep), 
+                estado: response.data.state, 
+                cidade: response.data.city, 
+                bairro: response.data.neighborhood, 
+                rua: response.data.street, 
+                titulo: this.titulo
+              };
 
-            if(this.ceps.filter(e => e.cep === novoCep.cep).length === 0) {
-              this.ceps.push(novoCep);
-              this.id++;
-            } else {
-              this.$q.notify ({
-                color: 'positive',
-                position: 'top',
-                message: 'Esse cep já foi armazenado',
-                icon: 'done'
-              })
+              if(this.ceps.filter(provavelCEP => provavelCEP.cep === novoCep.cep).length === 0) {
+                this.ceps.push(novoCep);
+                this.id++;
+              } else {
+                this.$q.notify ({
+                  color: 'positive',
+                  position: 'bottom',
+                  message: 'Esse cep já foi armazenado',
+                  icon: 'done'
+                })
+              }
             }
-          })
+          )
           .catch(() => {
             this.$q.notify({
               color: 'negative',
