@@ -19,7 +19,7 @@
       <div class="col-md-1">
         <q-btn unelevated class="full-width q-mt-md" color="negative" size="21.7px" @click="deleteGeral()">
           <q-icon color="white" :name="fasTimesCircle"/>
-          <q-tooltip>
+          <q-tooltip content-style="font-size: 24px">
             Delete todos os cards
           </q-tooltip>
         </q-btn>
@@ -30,10 +30,6 @@
       <div class="col-md-3" v-for="cep in ceps" :key="cep.id">
           <q-card align="middle">
             <q-card-section :class="classes">
-              <div class="absolute-top-left q-pt-sm q-pl-md text-light-blue-10">
-                <span>{{ cep.id }}</span>
-              </div>
-
               <div style="z-index: 1" class="absolute-top-right q-pt-xs q-pr-sm cursor-pointer">
                 <q-icon color="white" :name="fasTimes" @click="fechar(cep)"/>
               </div>
@@ -124,7 +120,7 @@
               } else {
                 this.$q.notify ({
                   color: 'positive',
-                  position: 'bottom',
+                  position: 'top',
                   message: 'Esse cep já foi armazenado',
                   icon: 'done'
                 })
@@ -135,9 +131,16 @@
             this.$q.notify({
               color: 'negative',
               position: 'top',
-              message: 'Este cep não existe',
+              message: 'Esse cep não existe',
               icon: 'report_problem'
             })
+          })
+        } else {
+          this.$q.notify ({
+            color: 'negative',
+            position: 'top',
+            message: 'Campo(s) vazio(s) detectado(s) por favor preencha-o(s)',
+            icon: 'report_probleme'
           })
         }
       },
@@ -153,7 +156,7 @@
       deleteGeral() {
         this.ceps = [];
         localStorage.setItem('CEPS', []);
-        this.id = 0;
+        this.id = 1;
       }
     }
   }
